@@ -34,9 +34,12 @@ class UnnSession:
         }
         self.response = self.session.post(f"{search_id_url}?term={search_head['term']}&type={search_head['type']}")
         users=self.response.json()
-        for user in users:
-            if str(user["description"]).lower()==config.GROUP_NUMBER.lower():
-                return user['id']
+        if len(users)>1:
+            for user in users:
+                if str(user["description"]).lower()==config.GROUP_NUMBER.lower():
+                    return user['id']
+        elif len(users)==1:
+            return users[0]['id']
         raise("User not found")
 
     def get_time(self, days=14):
