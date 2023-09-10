@@ -7,7 +7,6 @@ login_url = "https://portal.unn.ru/?login=yes"
 table_url = "https://portal.unn.ru/ruz/main"
 search_id_url = "https://portal.unn.ru/ruzapi/search"
 
-
 class UnnSession:
     def __init__(self):
         self.session = rq.Session()
@@ -40,14 +39,14 @@ class UnnSession:
                 return user['id']
         raise("User not found")
 
-    def get_time(self):
+    def get_time(self, days=14):
         start_time = datetime.datetime.now()
-        end_time = start_time + datetime.timedelta(days=14)
+        end_time = start_time + datetime.timedelta(days=days)
         return (str(start_time.date()).replace('-', '.'), str(end_time.date()).replace('-', '.'))
 
-    def get_table(self):
+    def get_table(self,days=14):
         table_url = f"https://portal.unn.ru/ruzapi/schedule/student/{self.search_id()}"
-        time = self.get_time()
+        time = self.get_time(days)
         table_head = {
             'start': time[0],
             'finish': time[1],
