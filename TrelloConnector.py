@@ -2,19 +2,25 @@ import requests as rq
 import config
 import datetime
 
-def day_in_list(day,lists,day_format="%Y.%m.%d",list_format="%Y.%m.%d"):
-    day=str_to_date(day,day_format)
+
+def day_in_list(day, lists, day_format="%Y.%m.%d", list_format="%Y.%m.%d"):
+    day = str_to_date(day, day_format)
     for list in lists:
-        if str_to_date(list['name'][3:],format=list_format) == day:
+        if str_to_date(list['name'][3:], format=list_format) == day:
             return True
     return False
+
+
 def action_is_complited(end, format="%Y-%m-%dT%H:%M:%S.%fZ"):
-    end = datetime.datetime.strptime(end,format)
+    end = datetime.datetime.strptime(end, format)
     now = datetime.datetime.now()
     res = end - now < datetime.timedelta(0)
     return res
-def str_to_date(date,format="%Y-%m-%dT%H:%M:%S.%fZ"):
-    return datetime.datetime.strptime(date,format)
+
+
+def str_to_date(date, format="%Y-%m-%dT%H:%M:%S.%fZ"):
+    return datetime.datetime.strptime(date, format)
+
 
 class TrelloConnector:
     def __init__(self, board_id):
@@ -44,12 +50,12 @@ class TrelloConnector:
     def list_name_generator(self, description):
         return str(description["dayOfWeek"] + " " + description["date"])
 
-    def create_list(self, description,pos='bottom'):
+    def create_list(self, description, pos='bottom'):
         url = f"https://api.trello.com/1/lists"
         params = self.params
-        params['idBoard']=self._board_id
-        params['name']=self.list_name_generator(description)
-        params['pos']=pos
+        params['idBoard'] = self._board_id
+        params['name'] = self.list_name_generator(description)
+        params['pos'] = pos
         self.response = self.session.post(url, params=params)
         return self.response.json()
 
@@ -105,8 +111,10 @@ class TrelloConnector:
         params["desc"] = f"Преподаватель: {description['lecturer']}"
 
         date = self.date_to_trello_format(description['date'])
-        params["start"] = date + "T" + description["beginLesson"] + "Z"
-        params["due"] = date + "T" + description["endLesson"] + "Z"
+        params["start"] = date
+        params["due"] = date + "T" + (
+                    str_to_date(description["endLesson"], format="%H:%M") - datetime.timedelta(hours=3)).strftime(
+            format="%H:%M") + "Z"
 
         params["idLabels"] = self.get_color_id(description['kindOfWork'])
         params["pos"] = "bottom"
@@ -124,32 +132,35 @@ class TrelloConnector:
 
     def update_card_status(self, card_id):
         url = f"https://api.trello.com/1/cards/{card_id}"
-        card_is_closed=action_is_complited(self.get_card(card_id)['due'])
+        card_is_closed = action_is_complited(self.get_card(card_id)['due'])
         params = self.params
         params['dueComplete'] = str(card_is_closed)
         self.response = self.session.put(url=url, headers=self.headers, params=params)
         return card_is_closed
+
     def archive_complited_list(self, list_id):
-        url=f"https://api.trello.com/1/lists/{list_id}"
+        url = f"https://api.trello.com/1/lists/{list_id}"
         cards = self.get_cards_on_list(list_id)
         for card in cards:
             if not self.update_card_status(card['id']):
                 return False
-        params=self.params
-        params['closed']='true'
-        self.response=self.session.put(url=url,params=params)
+        params = self.params
+        params['closed'] = 'true'
+        self.response = self.session.put(url=url, params=params)
 
     def archive_complited_lists(self):
         list_id = [list["id"] for list in self.get_lists_on_a_board()]
         for list in list_id:
             self.archive_complited_list(list)
-    def append_missing_days(self,table):
 
-       ###TODO
-       ###TODO
-       ###TODO
+    def append_missing_days(self, table):
 
-       pass
-    def update_table(self,table):
+        ###TODO
+        ###TODO
+        ###TODO
+
+        pass
+
+    def update_table(self, table):
         self.archive_complited_lists()
         self.append_missing_days(table)
