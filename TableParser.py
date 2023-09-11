@@ -1,11 +1,10 @@
 
 #dgdsjgsd
 class TableParser:
-    def __init__(self,json_table):
-        self.json_table=json_table
+    def __init__(self):
         self.table=[]
-    def parse(self):
-        for row in self.json_table:
+    def parse(self,json_table):
+        for row in json_table:
             day_table = {}
             day_table["dayOfWeek"]=row["dayOfWeekString"]
             day_table["beginLesson"]=row["beginLesson"]
