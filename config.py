@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-FULL_NAME = "Виноградов Константин Николаевич"
+FULL_NAME = "Виноградов Константин"
 PERSON_TYPE = "student"
 GROUP_NUMBER = "3821Б1ПМоп2"
 
@@ -16,4 +16,10 @@ UNN_PASSWORD = os.getenv("UNN_PASSWORD")
 
 API_KEY_TRELLO = os.getenv("API_KEY_TRELLO")
 API_TOKEN_TRELLO = os.getenv("API_TOKEN_TRELLO")
-BOARD_ID = os.getenv("BOARD_ID_PM")
+
+BOARD_ID_PM = os.getenv("BOARD_ID_PM")
+BOARD_ID_TYDS = os.getenv("BOARD_ID_TYDS")
+BOARD_ID_MOST = os.getenv("BOARD_ID_MOST")
+
+
+BOARD_ID_TEST = os.getenv("BOARD_ID_TEST")

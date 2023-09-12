@@ -52,7 +52,7 @@ class TrelloConnector:
 
     def create_list(self, description, pos='bottom'):
         url = f"https://api.trello.com/1/lists"
-        params = self.params
+        params = self.params.copy()
         params['idBoard'] = self._board_id
         params['name'] = self.list_name_generator(description)
         params['pos'] = pos
@@ -61,7 +61,7 @@ class TrelloConnector:
 
     def archive_list(self, id):
         url = f"https://api.trello.com/1/lists/{id}/closed"
-        params = self.params
+        params = self.params.copy()
         params['value'] = "true"
         self.response = self.session.put(url, params=params)
 
@@ -82,14 +82,14 @@ class TrelloConnector:
 
     def update_label(self, label_id, name, color):
         url = f"https://api.trello.com/1/labels/{label_id}"
-        params = self.params
+        params = self.params.copy()
         params['name'] = name
         params['color'] = color
         self.response = self.session.put(url, params=params)
 
     def create_label(self, name, color):
         url = f"https://api.trello.com/1/labels"
-        params = self.params
+        params = self.params.copy()
         params['name'] = name
         params['color'] = color
         params['idBoard'] = self._board_id
@@ -105,21 +105,22 @@ class TrelloConnector:
 
     def create_card(self, idList, description):
         url = "https://api.trello.com/1/cards"
-        params = self.params
+        params = self.params.copy()
         params["idList"] = idList
         params["name"] = self.card_name_generator(description)
         params["desc"] = f"Преподаватель: {description['lecturer']}"
 
         date = self.date_to_trello_format(description['date'])
-        params["start"] = date
+        params["start"] = date + "T" + (
+                str_to_date(description["beginLesson"], format="%H:%M") - datetime.timedelta(hours=3)).strftime(
+            format="%H:%M") + "Z"
         params["due"] = date + "T" + (
-                    str_to_date(description["endLesson"], format="%H:%M") - datetime.timedelta(hours=3)).strftime(
+                str_to_date(description["endLesson"], format="%H:%M") - datetime.timedelta(hours=3)).strftime(
             format="%H:%M") + "Z"
 
         params["idLabels"] = self.get_color_id(description['kindOfWork'])
         params["pos"] = "bottom"
         self.response = self.session.post(url, headers=self.headers, params=params)
-
     def get_card(self, card_id):
         url = f"https://api.trello.com/1/cards/{card_id}"
         self.response = self.session.get(url, headers=self.headers, params=self.params)
@@ -133,7 +134,7 @@ class TrelloConnector:
     def update_card_status(self, card_id):
         url = f"https://api.trello.com/1/cards/{card_id}"
         card_is_closed = action_is_complited(self.get_card(card_id)['due'])
-        params = self.params
+        params = self.params.copy()
         params['dueComplete'] = str(card_is_closed)
         self.response = self.session.put(url=url, headers=self.headers, params=params)
         return card_is_closed
@@ -144,7 +145,7 @@ class TrelloConnector:
         for card in cards:
             if not self.update_card_status(card['id']):
                 return False
-        params = self.params
+        params = self.params.copy()
         params['closed'] = 'true'
         self.response = self.session.put(url=url, params=params)
 
@@ -154,13 +155,38 @@ class TrelloConnector:
             self.archive_complited_list(list)
 
     def append_missing_days(self, table):
+        lists = self.get_lists_on_a_board()
+        if lists==[]:
+            max_date=datetime.datetime.now()-datetime.timedelta(days=1)
+            old_name=""
+        else:
+            max_date = max(lists, key=lambda x: x['name'][3:])
+            max_date = str_to_date(max_date['name'][3:], format="%Y.%m.%d")
+            old_name = max(lists,key=lambda x:x['name'][3:])['name']
 
-        ###TODO
-        ###TODO
-        ###TODO
-
-        pass
-
+        index = 0
+        for lesson in table['lessons']:
+            if str_to_date(lesson['date'], format="%Y.%m.%d") < max_date:
+                index += 1
+        list_id=''
+        for lesson_index in range(index, len(table['lessons'])-1):
+            lesson = table['lessons'][lesson_index]
+            name = self.list_name_generator(lesson)
+            if name!=old_name:
+                list_id=self.create_list(lesson)['id']
+            if list_id!='':
+                self.create_card(idList=list_id,description=lesson)
+            old_name=name
     def update_table(self, table):
         self.archive_complited_lists()
         self.append_missing_days(table)
+
+    def sort_lists(self):
+        lists=sorted(self.get_lists_on_a_board(),key=lambda x:x['name'][3:])
+        params=self.params.copy()
+        index=0
+        for list in lists:
+            params['pos'] =str(index)
+            index+=1
+            url =f"https://api.trello.com/1/lists/{list['id']}"
+            self.session.put(url,params=params)

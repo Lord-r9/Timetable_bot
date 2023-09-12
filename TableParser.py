@@ -2,8 +2,9 @@
 #dgdsjgsd
 class TableParser:
     def __init__(self):
-        self.table=[]
+        self.table={"days_number":0,"lessons":[]}
     def parse(self,json_table):
+        old_name=""
         for row in json_table:
             day_table = {}
             day_table["dayOfWeek"]=row["dayOfWeekString"]
@@ -15,5 +16,9 @@ class TableParser:
             day_table["building"]=row["building"]
             day_table["lecturer"]=row["lecturer"]
             day_table["date"]=row["date"]
-            self.table.append(day_table)
+            self.table['lessons'].append(day_table)
+
+            if day_table['dayOfWeek']!=old_name:
+                self.table['days_number']+=1
+            old_name=day_table['dayOfWeek']
         return self.table
