@@ -2,7 +2,7 @@ from TableParser import TableParser
 from UnnSession import UnnSession
 from TrelloConnector import TrelloConnector
 import config
-#fsdlmfsdkfh
+#fsdlmfsdh
 
 import time
 class App:
