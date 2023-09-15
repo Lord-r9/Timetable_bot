@@ -4,10 +4,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-FULL_NAME = "Виноградов Константин"
-PERSON_TYPE = "student"
-GROUP_NUMBER = "3821Б1ПМоп2"
-
 KIND_OF_WORKS = ["Лекция", "Практика (семинарские занятия)", "Лабораторная",None]
 COLORS = {"Лекция": 'green', 'Практика (семинарские занятия)': 'red', 'Лабораторная': 'blue',None:"black"}
 
