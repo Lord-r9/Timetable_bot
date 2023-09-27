@@ -1,6 +1,6 @@
 import asyncio
 
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher, types,F
 from config import TOKEN_API
 from keyboards import kb
 from aiogram.filters import Command, CommandStart
@@ -16,7 +16,8 @@ async def cmd_start(message: types.Message):
 @dp.message(Command(commands='auth'))
 async def auth_command(message: types.Message):
     await message.reply('Для авторизации введите свою фамилию, имя и отчество в одной строке через пробел.')
-@dp.message( lambda message: message.text.count(' ') == 2)
+#lambda message: message.text.count(' ') == 2
+@dp.message(F.text.regexp(r'([a-zA-z]+ )([a-zA-z]+)( [a-zA-z]*)?'))
 async def process_name(message: types.Message):
     global full_name
     full_name = message.text
