@@ -3,7 +3,7 @@ from config import TOKEN_API
 from keyboards import kb
 
 
-bot = Bot(TOKEN _API)
+bot = Bot(TOKEN_API)
 dp = Dispatcher(bot)
 
 
