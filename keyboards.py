@@ -1,7 +1,5 @@
-from aiogram.types import KeyboardButton, ReplyKeyboardMarkup, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder,ReplyKeyboardBuilder, KeyboardButton
 
-kb = ReplyKeyboardMarkup(resize_keyboard=True,
-                         one_time_keyboard=True)
-a = KeyboardButton(text="Today")
-b = KeyboardButton(text="Tomorrow")
-kb.add(a).add(b)
+kb = ReplyKeyboardBuilder()
+kb.add(KeyboardButton(text="Today",))
+kb.add(KeyboardButton(text="Tomorrow"))
