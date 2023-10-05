@@ -64,19 +64,6 @@ def consonant(s):
     return ind
 
 
-def name_cut(name: str):
-    res = ""
-    max_lenght = [3] + [5] * (len(name.split()) - 1)
-    i = 0
-    for name in name.split():
-        max_ind = (max_lenght[i]+consonant(name[min(max_lenght[i], len(name)):])) if name[min(max_lenght[i]-1,
-                                                                                                    len(name) - 1)] in vowel else \
-                                                                                                    max_lenght[i]
-        res = res + name[:max_ind] + '.'
-        i+=1
-    return res
-
-
 @dp.callback_query()
 async def timetable(callback: types.CallbackQuery):
     date = int(callback.data)
@@ -94,16 +81,19 @@ async def timetable(callback: types.CallbackQuery):
         timetable = tp.parse(unn.get_table(name, group, date=date))
         date = f"{unn.get_time(date)}\n"
         table = date
+        MAX_DISCIPLINE_SIZE = 20
+        MAX_KIND_SIZE = 10
+        MAX_STR_SIZE=80
         for lesson in timetable:
             time = f'*{lesson["beginLesson"]}:{lesson["endLesson"]}*'
-            discipline = f'{name_cut(lesson["discipline"]).center(40-len(name_cut(lesson["discipline"])))}'
-            kind = f'    {lesson["kindOfWork"].split()[0].replace("Лабораторная","Лаб. раб.").center(18-len(name_cut(lesson["kindOfWork"].split()[0])))}'
-            place = f'    {lesson["building"]} : {lesson["auditorium"]}\n'
-            table+=(time + '|' + \
-                         discipline + '|' + \
-                         kind + '|' + \
-                         place.replace("Корпус", "Кор.").replace("Виртуальное","Дист.")
-                         )
+            discipline = f'{lesson["discipline"][:MAX_DISCIPLINE_SIZE]}'
+            kind = f'{lesson["kindOfWork"].split()[0][:4]}'
+            place = f'{lesson["building"]} : {lesson["auditorium"]}\n'
+            table += (time + '|' + \
+                      discipline.center(int(MAX_DISCIPLINE_SIZE-len(discipline))) + '|' + \
+                      kind + '|' + \
+                      place.replace("Корпус", "Кор.").replace("Виртуальное", "Дист.")
+                      )
         if table != callback.message.text:
             await callback.message.edit_text(text=str(table), parse_mode='markdown')
             await callback.message.edit_reply_markup(reply_markup=new_kb.as_markup())
