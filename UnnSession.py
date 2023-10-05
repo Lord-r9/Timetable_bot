@@ -7,6 +7,7 @@ login_url = "https://portal.unn.ru/?login=yes"
 table_url = "https://portal.unn.ru/ruz/main"
 search_id_url = "https://portal.unn.ru/ruzapi/search"
 
+
 class UnnSession:
     def __init__(self):
         self.session = rq.Session()
@@ -28,35 +29,36 @@ class UnnSession:
         }
         self.response = self.session.post(login_url, headers=login_head, data=login_parameters)
 
-    def search_id(self, full_name,group_number, person_type='student'):
+    def search_id(self, full_name, group_number, person_type='student'):
         search_head = {
             "term": parse.quote_plus(full_name).replace('+', '%20'),
             "type": parse.quote_plus(person_type)
         }
         self.response = self.session.post(f"{search_id_url}?term={search_head['term']}&type={search_head['type']}")
-        users=self.response.json()
-        if len(users)>1:
+        users = self.response.json()
+
+        if len(users) > 1:
             for user in users:
-                if str(user["description"]).lower()==group_number.lower():
+                if str(user["description"]).lower() == group_number.lower():
                     return user['id']
-        elif len(users)==1:
+        elif len(users) == 1:
             return users[0]['id']
-        raise("User not found")
+
+        raise ("User not found")
 
     def get_time(self, days=14):
-        start_time = datetime.datetime.now()
-        end_time = start_time + datetime.timedelta(days=days)
-        return str(end_time.date()).replace('-', '.')
+        time = datetime.datetime.now() + datetime.timedelta(days=days)
+        return str(time.date()).replace('-', '.')
 
-    def get_table(self,name,group,days=14):
-        table_url = f"https://portal.unn.ru/ruzapi/schedule/student/{self.search_id(name,group)}"
-        time = self.get_time(days)
-
+    def get_table(self, name, group, date=0):
+        table_url = f"https://portal.unn.ru/ruzapi/schedule/student/{self.search_id(name, group)}"
+        date = self.get_time(date)
         table_head = {
-            'start': time,
-            'finish': time,
+            'start': date,
+            'finish': date,
             'lng': "1",
         }
         self.response = self.session.get(
             f"{table_url}?start={table_head['start']}&finish={table_head['finish']}&lng={table_head['lng']}")
         return self.response.json()
+

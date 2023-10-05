@@ -1,8 +1,8 @@
 import os
 from dotenv import load_dotenv
-
 load_dotenv()
 
+MAX_DATE=15
 
 TOKEN_API = os.getenv('API_KEY_TG')
 
