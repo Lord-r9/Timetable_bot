@@ -73,7 +73,6 @@ def name_cut(name: str):
                                                                                                     len(name) - 1)] in vowel else \
                                                                                                     max_lenght[i]
         res = res + name[:max_ind] + '.'
-        print(res)
         i+=1
     return res
 
