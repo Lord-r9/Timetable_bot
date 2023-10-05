@@ -1,6 +1,6 @@
 use timetable_bot;
 
-DROP procedure add_group_number;
+DROP procedure if exists add_group_number;
 DELIMITER //
 create procedure add_group_number(vchat_id INT, vgroup_number TEXT)
 BEGIN

@@ -1,6 +1,6 @@
 use timetable_bot;
 
-DROP procedure add_user_name;
+DROP procedure if exists add_user_name;
 DELIMITER //
 create procedure add_user_name(vchat_id INT, vuser_name TEXT)
 BEGIN
