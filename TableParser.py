@@ -5,6 +5,7 @@ class TableParser:
         self.table={"days_number":0,"lessons":[]}
     def parse(self,json_table):
         old_name=""
+        self.table={"days_number":0,"lessons":[]}
         for row in json_table:
             day_table = {}
             day_table["dayOfWeek"]=row["dayOfWeekString"]

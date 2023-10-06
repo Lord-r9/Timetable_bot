@@ -10,6 +10,7 @@ search_id_url = "https://portal.unn.ru/ruzapi/search"
 class UnnSession:
     def __init__(self):
         self.session = rq.Session()
+        self.login()
 
     def login(self, login=config.UNN_LOGIN, password=config.UNN_PASSWORD):
         agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
@@ -27,7 +28,7 @@ class UnnSession:
         }
         self.response = self.session.post(login_url, headers=login_head, data=login_parameters)
 
-    def search_id(self, full_name=config.FULL_NAME, person_type=config.PERSON_TYPE):
+    def search_id(self, full_name,group_number, person_type='student'):
         search_head = {
             "term": parse.quote_plus(full_name).replace('+', '%20'),
             "type": parse.quote_plus(person_type)
@@ -36,7 +37,7 @@ class UnnSession:
         users=self.response.json()
         if len(users)>1:
             for user in users:
-                if str(user["description"]).lower()==config.GROUP_NUMBER.lower():
+                if str(user["description"]).lower()==group_number.lower():
                     return user['id']
         elif len(users)==1:
             return users[0]['id']
@@ -45,14 +46,15 @@ class UnnSession:
     def get_time(self, days=14):
         start_time = datetime.datetime.now()
         end_time = start_time + datetime.timedelta(days=days)
-        return (str(start_time.date()).replace('-', '.'), str(end_time.date()).replace('-', '.'))
+        return str(end_time.date()).replace('-', '.')
 
-    def get_table(self,days=14):
-        table_url = f"https://portal.unn.ru/ruzapi/schedule/student/{self.search_id()}"
+    def get_table(self,name,group,days=14):
+        table_url = f"https://portal.unn.ru/ruzapi/schedule/student/{self.search_id(name,group)}"
         time = self.get_time(days)
+
         table_head = {
-            'start': time[0],
-            'finish': time[1],
+            'start': time,
+            'finish': time,
             'lng': "1",
         }
         self.response = self.session.get(
